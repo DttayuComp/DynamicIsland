@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Dynamic Island</title>
+<style>
+:root{--bg:#f7f7f7;--blue:#6d76bd;--green:#34c759;--line:#dedede;--text:#171717;--muted:#8c8c91}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;background:#000;overflow:hidden}
+.phone{position:fixed;inset:0;background:var(--bg);overflow:hidden}
+.status{height:50px;padding:13px 18px 0;display:flex;align-items:center;justify-content:space-between;font-size:15px;color:#111}
+.status .right{display:flex;gap:7px;align-items:center;font-weight:600}
+.signal{letter-spacing:-2px;font-size:15px}.wifi{font-size:16px}.battery{width:25px;height:12px;border:1.5px solid #111;border-radius:3px;position:relative}.battery:after{content:"";position:absolute;right:-3px;top:3px;width:2px;height:5px;background:#111;border-radius:1px}.battery i{display:block;width:19px;height:8px;margin:1px;background:#111;border-radius:1px}
+.island{position:absolute;top:7px;left:50%;transform:translateX(-50%);height:30px;width:126px;background:#000;border-radius:18px;z-index:5;transition:.25s}
+.nav{height:48px;display:flex;align-items:center;justify-content:center;position:relative;border-bottom:0 solid var(--line)}
+.nav .back{position:absolute;left:14px;color:var(--blue);font-size:17px}.nav .title{font-size:17px;font-weight:600}
+.scroll{height:calc(100% - 98px);overflow:auto;padding-bottom:45px}
+.section-label{font-size:12px;color:#8a8a8f;text-transform:uppercase;margin:20px 16px 7px}
+.row{min-height:54px;background:#fff;border-bottom:1px solid #e1e1e1;display:flex;align-items:center;padding:9px 16px;gap:12px}
+.row:first-of-type{border-top:1px solid #e1e1e1}
+.icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex:none}
+.gray{background:#888}.green{background:#35b95b}.blue{background:#315de8}
+.row .label{font-size:17px;line-height:22px;flex:1}.row .chev{color:#a1a1a6;font-size:22px;font-weight:300}
+.toggle{width:51px;height:31px;border-radius:20px;background:#d8d8dc;position:relative;flex:none;transition:.2s}.toggle.on{background:var(--green)}.toggle:after{content:"";position:absolute;width:27px;height:27px;top:2px;left:2px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #777;transition:.2s}.toggle.on:after{left:22px}
+.design{background:#fff;padding:10px 16px 16px}
+.design-title{font-size:17px;margin-bottom:10px}
+.swatches{display:flex;gap:20px;align-items:center}.swatch{width:32px;height:32px;border-radius:50%;border:1px solid #ddd;position:relative}.swatch.active:after{content:"";position:absolute;inset:-4px;border:2px solid var(--blue);border-radius:50%}.s1{background:#000}.s2{background:linear-gradient(135deg,#9b2020,#df4d48)}.s3{background:radial-gradient(circle at 35% 35%,#eee,#d6c3c0)}.s4{background:#ead9d6}.s5{background:#bda5a4}.s6{background:#000}.s6:before{content:"♥";color:#fff;position:absolute;inset:0;display:grid;place-items:center;font-size:14px}
+.gallery{height:49px;background:#fff;color:var(--blue);display:flex;align-items:center;padding:0 16px;font-size:16px;border-bottom:1px solid #e1e1e1}.gallery .chev{margin-left:auto;color:#aaa;font-size:21px}
+.info{background:#fff;color:#929297;font-size:12px;line-height:16px;padding:13px 16px 18px}
+.preview{margin:14px 16px;background:#161616;height:92px;border-radius:18px;display:flex;align-items:center;justify-content:center}
+.fake-pill{height:31px;border-radius:18px;width:126px;background:#000;box-shadow:0 0 0 1px #222}
+.hidden .fake-pill{opacity:0}
+.reverse{position:fixed;right:12px;bottom:18px;background:rgba(0,0,0,.72);color:#fff;border-radius:18px;padding:9px 13px;font-size:12px;z-index:20}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+  <div class="status">
+    <span id="time">15:52</span>
+    <span class="right"><span class="signal">▮▮▮</span><span class="wifi">⌁</span><span class="battery"><i></i></span></span>
+  </div>
+  <div class="island" id="island"></div>
+
+  <div class="nav">
+    <span class="back">‹&nbsp; Настройки</span>
+    <span class="title">Dynamic Island</span>
+  </div>
+
+  <div class="scroll">
+    <div class="section-label">ВИЗУАЛ</div>
+
+    <div class="design">
+      <div class="design-title">Свой дизайн</div>
+      <div class="swatches" id="swatches">
+        <span class="swatch s1 active" data-color="#000"></span>
+        <span class="swatch s2" data-color="#bd3535"></span>
+        <span class="swatch s3" data-color="#e4d5d1"></span>
+        <span class="swatch s4" data-color="#e7d8d4"></span>
+        <span class="swatch s5" data-color="#bda5a4"></span>
+        <span class="swatch s6" data-color="#000"></span>
+      </div>
+    </div>
+
+    <div class="gallery">Выбрать из галереи <span class="chev">›</span></div>
+
+    <div class="info">Вы можете настроить Dynamic Island или скрыть его.<br>Эти функции помогают минимизировать отвлекающие факторы и позволяют вам сосредоточиться,<br>успокоиться или отдохнуть.</div>
+
+    <div class="section-label">ДОСТУПНОСТЬ</div>
+
+    <div class="row" id="hideRow">
+      <div class="icon gray">◉</div><div class="label">Убрать Dynamic Island</div>
+      <div class="toggle" id="hideToggle"></div>
+    </div>
+
+    <div class="row">
+      <div class="icon green">◔</div><div class="label">Уменьшение движения</div>
+      <div class="toggle on" id="motionToggle"></div>
+    </div>
+
+    <div class="row">
+      <div class="icon blue">Aᴬ</div><div class="label">Размер и цвет текста</div><div class="chev">›</div>
+    </div>
+
+    <div class="section-label">ПРЕДПРОСМОТР</div>
+    <div class="preview"><div class="fake-pill" id="fakePill"></div></div>
+
+    <div class="section-label">ПРИЛОЖЕНИЯ</div>
+    <div class="row"><div class="icon green">●</div><div class="label">Сообщения</div><div class="chev">›</div></div>
+    <div class="row"><div class="icon" style="background:#df3b42">♪</div><div class="label">Музыка</div><div class="chev">›</div></div>
+    <div class="row"><div class="icon green">☎</div><div class="label">Телефон</div><div class="chev">›</div></div>
+  </div>
+
+  <button class="reverse" id="reverse">↻ Повернуть интерфейс</button>
+</div>
+<script>
+const island=document.getElementById('island'), fake=document.getElementById('fakePill');
+const hideToggle=document.getElementById('hideToggle');
+hideToggle.onclick=()=>{hideToggle.classList.toggle('on'); island.style.opacity=hideToggle.classList.contains('on')?'0':'1'; fake.style.opacity=hideToggle.classList.contains('on')?'0':'1';};
+document.getElementById('motionToggle').onclick=e=>e.currentTarget.classList.toggle('on');
+document.querySelectorAll('.swatch').forEach(s=>s.onclick=()=>{
+ document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active')); s.classList.add('active');
+ const c=s.dataset.color; island.style.background=c; fake.style.background=c;
+});
+function setTime(){document.getElementById('time').textContent=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}
+setTime(); setInterval(setTime,30000);
+let rot=0; document.getElementById('reverse').onclick=()=>{rot+=180; document.getElementById('app').style.transform=`rotate(${rot}deg)`;};
+</script>
+</body></html>
